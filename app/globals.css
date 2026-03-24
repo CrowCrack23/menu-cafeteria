@@ -49,6 +49,21 @@
 }
 
 :root {
+  /* Mood gradients */
+  --mood-energized-from: #f97316;
+  --mood-energized-to: #eab308;
+  --mood-chill-from: #6366f1;
+  --mood-chill-to: #8b5cf6;
+  --mood-happy-from: #f472b6;
+  --mood-happy-to: #fb923c;
+  --mood-hungry-from: #ef4444;
+  --mood-hungry-to: #f97316;
+  --mood-cozy-from: #a78bfa;
+  --mood-cozy-to: #6366f1;
+  /* Page gradient */
+  --page-gradient-from: #0f0c29;
+  --page-gradient-via: #302b63;
+  --page-gradient-to: #24243e;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
