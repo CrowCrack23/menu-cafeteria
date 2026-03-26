@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Heart, Clock, UtensilsCrossed } from "lucide-react";
+import { Home, Heart, Clock, Package } from "lucide-react";
 
 const navItems = [
-  { href: "/", label: "Inicio", icon: Home },
+  { href: "/", label: "Combos", icon: Home },
   { href: "/favoritos", label: "Favoritos", icon: Heart },
   { href: "/historial", label: "Historial", icon: Clock },
-  { href: "/menu", label: "Menu", icon: UtensilsCrossed },
+  { href: "/menu", label: "Stock", icon: Package },
 ];
 
 export function BottomNav() {

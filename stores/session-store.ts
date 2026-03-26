@@ -1,121 +1,51 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { getTodayDateString, getYesterdayDateString } from "@/lib/time-utils";
+import type { ComboItem } from "@/lib/combos";
 
 interface HistoryEntry {
-  comboId: string;
-  moodId: string;
+  comboId: string; // pre-made combo ID or custom combo ID
   timestamp: number;
 }
 
+interface SavedCombo {
+  id: string;
+  name: string;
+  items: ComboItem[];
+  createdAt: number;
+}
+
 interface SessionState {
-  streakCount: number;
-  lastVisitDate: string | null;
-  lastMood: string | null;
-  totalVisits: number;
   hasHydrated: boolean;
-  comboIndices: Record<string, number>;
-  lastCombo: { moodId: string; comboId: string } | null;
   favoriteComboIds: string[];
   comboHistory: HistoryEntry[];
+  savedCombos: SavedCombo[];
 }
 
 interface SessionActions {
-  updateStreak: () => {
-    isFirstVisit: boolean;
-    isMilestone: boolean;
-    streakBroken: boolean;
-  };
-  setLastMood: (moodId: string) => void;
   setHasHydrated: (hydrated: boolean) => void;
-  getNextComboIndex: (moodId: string) => number;
-  setLastCombo: (moodId: string, comboId: string) => void;
   toggleFavorite: (comboId: string) => void;
   isFavorite: (comboId: string) => boolean;
-  addToHistory: (comboId: string, moodId: string) => void;
+  addToHistory: (comboId: string) => void;
   clearHistory: () => void;
+  saveCustomCombo: (name: string, items: ComboItem[]) => string;
+  deleteCustomCombo: (id: string) => void;
+  getSavedCombo: (id: string) => SavedCombo | undefined;
 }
 
-const MILESTONE_DAYS = [5, 10, 30];
 const MAX_HISTORY = 20;
+
+export type { SavedCombo, HistoryEntry };
 
 export const useSessionStore = create<SessionState & SessionActions>()(
   persist(
     (set, get) => ({
-      streakCount: 0,
-      lastVisitDate: null,
-      lastMood: null,
-      totalVisits: 0,
       hasHydrated: false,
-      comboIndices: {},
-      lastCombo: null,
       favoriteComboIds: [],
       comboHistory: [],
+      savedCombos: [],
 
       setHasHydrated: (hydrated: boolean) => {
         set({ hasHydrated: hydrated });
-      },
-
-      updateStreak: () => {
-        const state = get();
-        const today = getTodayDateString();
-        const yesterday = getYesterdayDateString();
-
-        if (state.lastVisitDate === null) {
-          set({
-            streakCount: 1,
-            lastVisitDate: today,
-            totalVisits: 1,
-          });
-          return { isFirstVisit: true, isMilestone: false, streakBroken: false };
-        }
-
-        if (state.lastVisitDate === today) {
-          set({ totalVisits: state.totalVisits + 1 });
-          return {
-            isFirstVisit: false,
-            isMilestone: MILESTONE_DAYS.includes(state.streakCount),
-            streakBroken: false,
-          };
-        }
-
-        if (state.lastVisitDate === yesterday) {
-          const newStreak = state.streakCount + 1;
-          set({
-            streakCount: newStreak,
-            lastVisitDate: today,
-            totalVisits: state.totalVisits + 1,
-          });
-          return {
-            isFirstVisit: false,
-            isMilestone: MILESTONE_DAYS.includes(newStreak),
-            streakBroken: false,
-          };
-        }
-
-        set({
-          streakCount: 1,
-          lastVisitDate: today,
-          totalVisits: state.totalVisits + 1,
-        });
-        return { isFirstVisit: false, isMilestone: false, streakBroken: true };
-      },
-
-      setLastMood: (moodId: string) => {
-        set({ lastMood: moodId });
-      },
-
-      getNextComboIndex: (moodId: string) => {
-        const state = get();
-        const current = state.comboIndices[moodId] ?? 0;
-        set({
-          comboIndices: { ...state.comboIndices, [moodId]: current + 1 },
-        });
-        return current;
-      },
-
-      setLastCombo: (moodId: string, comboId: string) => {
-        set({ lastCombo: { moodId, comboId } });
       },
 
       toggleFavorite: (comboId: string) => {
@@ -132,10 +62,10 @@ export const useSessionStore = create<SessionState & SessionActions>()(
         return get().favoriteComboIds.includes(comboId);
       },
 
-      addToHistory: (comboId: string, moodId: string) => {
+      addToHistory: (comboId: string) => {
         const state = get();
         const filtered = state.comboHistory.filter((e) => e.comboId !== comboId);
-        const entry: HistoryEntry = { comboId, moodId, timestamp: Date.now() };
+        const entry: HistoryEntry = { comboId, timestamp: Date.now() };
         const next = [entry, ...filtered].slice(0, MAX_HISTORY);
         set({ comboHistory: next });
       },
@@ -143,18 +73,32 @@ export const useSessionStore = create<SessionState & SessionActions>()(
       clearHistory: () => {
         set({ comboHistory: [] });
       },
+
+      saveCustomCombo: (name: string, items: ComboItem[]) => {
+        const id = `custom-${Date.now()}`;
+        const saved: SavedCombo = { id, name, items, createdAt: Date.now() };
+        set({ savedCombos: [...get().savedCombos, saved] });
+        return id;
+      },
+
+      deleteCustomCombo: (id: string) => {
+        const state = get();
+        set({
+          savedCombos: state.savedCombos.filter((c) => c.id !== id),
+          favoriteComboIds: state.favoriteComboIds.filter((fid) => fid !== id),
+        });
+      },
+
+      getSavedCombo: (id: string) => {
+        return get().savedCombos.find((c) => c.id === id);
+      },
     }),
     {
       name: "session-storage",
       partialize: (state) => ({
-        streakCount: state.streakCount,
-        lastVisitDate: state.lastVisitDate,
-        lastMood: state.lastMood,
-        totalVisits: state.totalVisits,
-        comboIndices: state.comboIndices,
-        lastCombo: state.lastCombo,
         favoriteComboIds: state.favoriteComboIds,
         comboHistory: state.comboHistory,
+        savedCombos: state.savedCombos,
       }),
       storage: {
         getItem: (name) => {
@@ -169,14 +113,14 @@ export const useSessionStore = create<SessionState & SessionActions>()(
           try {
             localStorage.setItem(name, JSON.stringify(value));
           } catch {
-            // localStorage unavailable (incognito, quota exceeded) — degrade silently
+            // degrade silently
           }
         },
         removeItem: (name) => {
           try {
             localStorage.removeItem(name);
           } catch {
-            // localStorage unavailable — degrade silently
+            // degrade silently
           }
         },
       },

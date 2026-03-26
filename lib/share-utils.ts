@@ -1,38 +1,34 @@
-import type { Combo } from "./combo-datasets";
-import { getMoodById } from "./moods";
-import { getItemPrice, getComboTotal } from "./prices";
+import type { ComboItem } from "./combos";
+import { calculateComboTotal, resolveComboItems } from "./combos";
+import { formatCUP, cupToUSD } from "./products";
 
-function formatComboText(combo: Combo): string {
-  const mood = getMoodById(combo.moodId);
-  const itemsText = combo.items
-    .map((item) => `${item.emoji} ${item.name} — $${getItemPrice(item.name)}`)
+function formatComboText(name: string, items: ComboItem[]): string {
+  const resolved = resolveComboItems(items);
+  const itemsText = resolved
+    .map((r) => `${r.product.emoji} ${r.quantity}x ${r.product.name} — $${formatCUP(r.product.price * r.quantity)}`)
     .join("\n");
-  const total = getComboTotal(combo.items);
+  const total = calculateComboTotal(items);
 
   return [
-    `${mood?.emoji ?? ""} ${combo.name}`,
-    combo.message,
+    `📦 ${name}`,
     "",
     itemsText,
     "",
-    `Total: $${total} CUP`,
-    `Match: ${combo.matchScore}%`,
+    `Total: $${formatCUP(total)} CUP (~$${cupToUSD(total)} USD)`,
     "",
     "— Mi Combo",
   ].join("\n");
 }
 
 export async function shareCombo(
-  combo: Combo,
+  name: string,
+  items: ComboItem[],
 ): Promise<"shared" | "copied" | "failed"> {
-  const text = formatComboText(combo);
+  const text = formatComboText(name, items);
 
   if (typeof navigator !== "undefined" && navigator.share) {
     try {
-      await navigator.share({
-        title: combo.name,
-        text,
-      });
+      await navigator.share({ title: name, text });
       return "shared";
     } catch (err) {
       if (err instanceof Error && err.name === "AbortError") {

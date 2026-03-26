@@ -1,81 +1,66 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import type { Mood } from "@/lib/moods";
-import { useSessionStore } from "@/stores/session-store";
-import { getTimePeriod } from "@/lib/time-utils";
-import { getWelcomeMessage } from "@/lib/welcome-messages";
-import { WelcomeBanner } from "@/components/welcome-banner";
-import { MoodGrid } from "@/components/mood-grid";
-import { SurpriseButton } from "@/components/surprise-button";
-import { StreakBadge } from "@/components/streak-badge";
+import Link from "next/link";
+import { combos, calculateComboTotal, getComboItemCount } from "@/lib/combos";
+import { formatCUP } from "@/lib/products";
 
 export default function Home() {
-  const router = useRouter();
-  const { hasHydrated, updateStreak, setLastMood, lastMood, streakCount } =
-    useSessionStore();
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [welcomeMessage, setWelcomeMessage] = useState("");
-  const [subtitle, setSubtitle] = useState("");
-  const [visitInfo, setVisitInfo] = useState<{
-    isFirstVisit: boolean;
-    isMilestone: boolean;
-    streakBroken: boolean;
-  } | null>(null);
-
-  useEffect(() => {
-    if (!hasHydrated) return;
-
-    const info = updateStreak();
-    setVisitInfo(info);
-
-    const currentStreak = useSessionStore.getState().streakCount;
-
-    setWelcomeMessage(
-      getWelcomeMessage({
-        timePeriod: getTimePeriod(),
-        isFirstVisit: info.isFirstVisit,
-        streakCount: currentStreak,
-        isMilestone: info.isMilestone,
-        streakBroken: info.streakBroken,
-      }),
-    );
-
-    setSubtitle(
-      info.isFirstVisit
-        ? "Elige tu mood y te armamos el combo perfecto"
-        : "¿Cómo te sientes hoy?",
-    );
-  }, [hasHydrated, updateStreak]);
-
-  const handleMoodSelect = useCallback(
-    (mood: Mood) => {
-      if (isTransitioning) return;
-      setIsTransitioning(true);
-      setLastMood(mood.id);
-      router.push(`/combo?mood=${mood.id}`);
-    },
-    [isTransitioning, setLastMood, router],
-  );
-
-  if (!hasHydrated || !visitInfo) {
-    return <div className="flex flex-col flex-1 items-center justify-center min-h-dvh" />;
-  }
-
   return (
-    <div className="flex flex-col flex-1 items-center min-h-dvh px-4 py-8 pb-24 sm:py-12 sm:justify-center">
-      <div className="flex flex-col items-center gap-6 sm:gap-10 w-full max-w-lg my-auto">
-        {!visitInfo.isFirstVisit && streakCount > 0 && (
-          <StreakBadge count={streakCount} />
-        )}
-        <WelcomeBanner message={welcomeMessage} subtitle={subtitle} />
-        <MoodGrid onSelect={handleMoodSelect} disabled={isTransitioning} />
-        <SurpriseButton
-          lastMoodId={lastMood}
-          onSelect={handleMoodSelect}
-          disabled={isTransitioning}
-        />
+    <div className="flex flex-col min-h-dvh px-4 py-6 pb-24">
+      <div className="w-full max-w-lg mx-auto">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-foreground">Mi Combo</h1>
+          <p className="text-muted-foreground text-sm mt-1">
+            Elige un combo o arma el tuyo
+          </p>
+        </div>
+
+        {/* Build your own CTA */}
+        <Link
+          href="/armar"
+          className="flex items-center justify-between w-full p-4 mb-4 rounded-xl bg-foreground text-primary-foreground"
+        >
+          <div>
+            <span className="font-bold text-base">Arma tu combo</span>
+            <p className="text-xs opacity-70 mt-0.5">Elige los productos que necesitas</p>
+          </div>
+          <span className="text-2xl">🛒</span>
+        </Link>
+
+        {/* Combos list */}
+        <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-3">
+          Combos disponibles
+        </h2>
+
+        <div className="flex flex-col gap-2.5">
+          {combos.map((combo) => {
+            const total = calculateComboTotal(combo.items);
+            const itemCount = getComboItemCount(combo.items);
+
+            return (
+              <Link
+                key={combo.id}
+                href={`/combo/${combo.id}`}
+                className="flex items-center gap-4 p-4 rounded-xl bg-white border border-border active:scale-[0.98] transition-transform"
+              >
+                <div className="flex flex-col items-center justify-center w-14 h-14 rounded-xl bg-secondary shrink-0">
+                  <span className="text-lg font-bold text-foreground">${combo.priceUSD}</span>
+                  <span className="text-[10px] text-muted-foreground">USD</span>
+                </div>
+                <div className="flex flex-col min-w-0 flex-1">
+                  <span className="text-foreground font-semibold text-sm leading-tight">
+                    {combo.name}
+                  </span>
+                  <span className="text-muted-foreground text-xs mt-0.5">
+                    {itemCount} productos · ${formatCUP(total)} CUP
+                  </span>
+                </div>
+                <span className="text-muted-foreground text-sm">→</span>
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
