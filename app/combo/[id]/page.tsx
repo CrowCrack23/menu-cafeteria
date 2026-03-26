@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState, useCallback } from "react";
+import { use, useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -45,9 +45,12 @@ export default function ComboDetailPage({
   const hasUnavailable = resolved.some((r) => unavailableSet.has(r.product.name));
 
   // Track view in history
-  if (hasHydrated && source) {
-    addToHistory(id);
-  }
+  useEffect(() => {
+    if (hasHydrated && source) {
+      addToHistory(id);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasHydrated, id]);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
