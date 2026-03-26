@@ -1,11 +1,13 @@
 import type { Combo } from "./combo-datasets";
 import { getMoodById } from "./moods";
+import { getItemPrice, getComboTotal } from "./prices";
 
 function formatComboText(combo: Combo): string {
   const mood = getMoodById(combo.moodId);
   const itemsText = combo.items
-    .map((item) => `${item.emoji} ${item.name} — ${item.description}`)
+    .map((item) => `${item.emoji} ${item.name} — $${getItemPrice(item.name)}`)
     .join("\n");
+  const total = getComboTotal(combo.items);
 
   return [
     `${mood?.emoji ?? ""} ${combo.name}`,
@@ -13,9 +15,10 @@ function formatComboText(combo: Combo): string {
     "",
     itemsText,
     "",
+    `Total: $${total} CUP`,
     `Match: ${combo.matchScore}%`,
     "",
-    "— AI Combo Experience",
+    "— Mi Combo",
   ].join("\n");
 }
 

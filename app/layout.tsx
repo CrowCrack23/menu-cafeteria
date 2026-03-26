@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
+import { BottomNav } from "@/components/bottom-nav";
 
 const geistSans = Geist({
   variable: "--font-sans",
@@ -25,7 +26,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`${geistSans.variable} h-dvh antialiased`}>
-      <body className="min-h-dvh flex flex-col bg-[#f8f9fa]">{children}</body>
+      <body className="min-h-dvh flex flex-col bg-[#f8f9fa]">
+        {children}
+        <BottomNav />
+      </body>
     </html>
   );
 }

@@ -2,6 +2,12 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { getTodayDateString, getYesterdayDateString } from "@/lib/time-utils";
 
+interface HistoryEntry {
+  comboId: string;
+  moodId: string;
+  timestamp: number;
+}
+
 interface SessionState {
   streakCount: number;
   lastVisitDate: string | null;
@@ -10,6 +16,8 @@ interface SessionState {
   hasHydrated: boolean;
   comboIndices: Record<string, number>;
   lastCombo: { moodId: string; comboId: string } | null;
+  favoriteComboIds: string[];
+  comboHistory: HistoryEntry[];
 }
 
 interface SessionActions {
@@ -22,9 +30,14 @@ interface SessionActions {
   setHasHydrated: (hydrated: boolean) => void;
   getNextComboIndex: (moodId: string) => number;
   setLastCombo: (moodId: string, comboId: string) => void;
+  toggleFavorite: (comboId: string) => void;
+  isFavorite: (comboId: string) => boolean;
+  addToHistory: (comboId: string, moodId: string) => void;
+  clearHistory: () => void;
 }
 
 const MILESTONE_DAYS = [5, 10, 30];
+const MAX_HISTORY = 20;
 
 export const useSessionStore = create<SessionState & SessionActions>()(
   persist(
@@ -36,6 +49,8 @@ export const useSessionStore = create<SessionState & SessionActions>()(
       hasHydrated: false,
       comboIndices: {},
       lastCombo: null,
+      favoriteComboIds: [],
+      comboHistory: [],
 
       setHasHydrated: (hydrated: boolean) => {
         set({ hasHydrated: hydrated });
@@ -102,6 +117,32 @@ export const useSessionStore = create<SessionState & SessionActions>()(
       setLastCombo: (moodId: string, comboId: string) => {
         set({ lastCombo: { moodId, comboId } });
       },
+
+      toggleFavorite: (comboId: string) => {
+        const state = get();
+        const ids = state.favoriteComboIds;
+        if (ids.includes(comboId)) {
+          set({ favoriteComboIds: ids.filter((id) => id !== comboId) });
+        } else {
+          set({ favoriteComboIds: [...ids, comboId] });
+        }
+      },
+
+      isFavorite: (comboId: string) => {
+        return get().favoriteComboIds.includes(comboId);
+      },
+
+      addToHistory: (comboId: string, moodId: string) => {
+        const state = get();
+        const filtered = state.comboHistory.filter((e) => e.comboId !== comboId);
+        const entry: HistoryEntry = { comboId, moodId, timestamp: Date.now() };
+        const next = [entry, ...filtered].slice(0, MAX_HISTORY);
+        set({ comboHistory: next });
+      },
+
+      clearHistory: () => {
+        set({ comboHistory: [] });
+      },
     }),
     {
       name: "session-storage",
@@ -112,6 +153,8 @@ export const useSessionStore = create<SessionState & SessionActions>()(
         totalVisits: state.totalVisits,
         comboIndices: state.comboIndices,
         lastCombo: state.lastCombo,
+        favoriteComboIds: state.favoriteComboIds,
+        comboHistory: state.comboHistory,
       }),
       storage: {
         getItem: (name) => {

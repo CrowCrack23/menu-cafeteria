@@ -8,6 +8,7 @@ import {
   categoryOrder,
 } from "@/lib/product-catalog";
 import type { CategoryKey } from "@/lib/product-catalog";
+import { useMenuStore } from "@/stores/menu-store";
 import { ProductCard } from "./product-card";
 
 interface ProductCatalogProps {
@@ -20,12 +21,13 @@ export function ProductCatalogView({
   onAdd,
 }: ProductCatalogProps) {
   const [activeTab, setActiveTab] = useState<CategoryKey>("main");
+  const { unavailableItems } = useMenuStore();
+  const unavailableSet = new Set(unavailableItems);
   const selectedNames = new Set(selectedItems.map((i) => i.name));
   const items = productCatalog.categories[activeTab];
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Category tabs */}
       <div className="flex gap-2 overflow-x-auto pb-1">
         {categoryOrder.map((key) => {
           const isActive = key === activeTab;
@@ -48,14 +50,14 @@ export function ProductCatalogView({
         })}
       </div>
 
-      {/* Product list */}
       <div className="flex flex-col gap-1 max-h-[40vh] overflow-y-auto">
         {items.map((item) => (
           <ProductCard
             key={item.name}
             item={item}
             isSelected={selectedNames.has(item.name)}
-            onTap={() => !selectedNames.has(item.name) && onAdd(item)}
+            onTap={() => !selectedNames.has(item.name) && !unavailableSet.has(item.name) && onAdd(item)}
+            available={!unavailableSet.has(item.name)}
           />
         ))}
       </div>

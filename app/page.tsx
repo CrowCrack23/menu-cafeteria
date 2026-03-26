@@ -64,7 +64,7 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col flex-1 items-center min-h-dvh px-4 py-8 sm:py-12 sm:justify-center">
+    <div className="flex flex-col flex-1 items-center min-h-dvh px-4 py-8 pb-24 sm:py-12 sm:justify-center">
       <div className="flex flex-col items-center gap-6 sm:gap-10 w-full max-w-lg my-auto">
         {!visitInfo.isFirstVisit && streakCount > 0 && (
           <StreakBadge count={streakCount} />

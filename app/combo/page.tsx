@@ -4,7 +4,9 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { getMoodById } from "@/lib/moods";
 import { getComboForMood, isMoodValid } from "@/lib/combo-generator";
+import { getComboById } from "@/lib/combo-lookup";
 import { useSessionStore } from "@/stores/session-store";
+import { useMenuStore } from "@/stores/menu-store";
 import type { Combo, FoodItem } from "@/lib/combo-datasets";
 import type { Mood } from "@/lib/moods";
 import { GeneratingAnimation } from "@/components/generating-animation";
@@ -17,7 +19,16 @@ import Link from "next/link";
 function ComboContent() {
   const searchParams = useSearchParams();
   const moodId = searchParams.get("mood");
-  const { hasHydrated, getNextComboIndex, setLastCombo } = useSessionStore();
+  const comboIdParam = searchParams.get("id");
+  const {
+    hasHydrated,
+    getNextComboIndex,
+    setLastCombo,
+    toggleFavorite,
+    isFavorite,
+    addToHistory,
+  } = useSessionStore();
+  const { hasHydrated: menuHydrated, unavailableItems } = useMenuStore();
 
   const [loading, setLoading] = useState(true);
   const [combo, setCombo] = useState<Combo | null>(null);
@@ -37,9 +48,10 @@ function ComboContent() {
       setCombo(newCombo);
       setDisplayCombo(newCombo);
       setLastCombo(moodId, newCombo.id);
+      addToHistory(newCombo.id, moodId);
     }
     setLoading(false);
-  }, [moodId, getNextComboIndex, setLastCombo]);
+  }, [moodId, getNextComboIndex, setLastCombo, addToHistory]);
 
   useEffect(() => {
     if (!hasHydrated) return;
@@ -47,8 +59,21 @@ function ComboContent() {
 
     const m = getMoodById(moodId);
     if (m) setMood(m);
+
+    // Load specific combo by ID if provided
+    if (comboIdParam) {
+      const found = getComboById(comboIdParam);
+      if (found) {
+        setCombo(found);
+        setDisplayCombo(found);
+        addToHistory(found.id, moodId);
+        setLoading(false);
+        return;
+      }
+    }
+
     generateCombo();
-  }, [hasHydrated, moodId, generateCombo]);
+  }, [hasHydrated, moodId, comboIdParam, generateCombo, addToHistory]);
 
   const handleRegenerate = useCallback(() => {
     generateCombo();
@@ -62,9 +87,9 @@ function ComboContent() {
     (items: FoodItem[], score: number) => {
       if (!combo) return;
 
-      const hasChanges = items.some(
-        (item, i) => combo.items[i]?.name !== item.name,
-      ) || items.length !== combo.items.length;
+      const hasChanges =
+        items.some((item, i) => combo.items[i]?.name !== item.name) ||
+        items.length !== combo.items.length;
 
       if (hasChanges) {
         const customCombo: Combo = {
@@ -82,9 +107,11 @@ function ComboContent() {
     [combo],
   );
 
+  const unavailableSet = new Set(unavailableItems);
+
   if (!moodId || (hasHydrated && !isMoodValid(moodId))) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-dvh gap-4 px-4">
+      <div className="flex flex-col items-center justify-center min-h-dvh gap-4 px-4 pb-20">
         <span className="text-4xl">🤔</span>
         <p className="text-lg text-center text-foreground">
           No encontramos tu mood. Vamos a elegir uno.
@@ -99,22 +126,28 @@ function ComboContent() {
     );
   }
 
-  if (!hasHydrated || !mood) {
+  if (!hasHydrated || !menuHydrated || !mood) {
     return <div className="flex flex-col flex-1 items-center justify-center min-h-dvh" />;
   }
 
   return (
-    <div className="flex flex-col items-center min-h-dvh px-4 py-8 sm:py-12 sm:justify-center">
+    <div className="flex flex-col items-center min-h-dvh px-4 py-8 pb-24 sm:py-12 sm:justify-center">
       <div className="flex flex-col items-center gap-6 sm:gap-8 w-full max-w-md my-auto">
         {loading || !displayCombo ? (
           <GeneratingAnimation />
         ) : (
           <>
-            <ComboResult combo={displayCombo} mood={mood} />
+            <ComboResult
+              combo={displayCombo}
+              mood={mood}
+              unavailableItems={unavailableSet}
+            />
             <ComboActions
               onRegenerate={handleRegenerate}
               onCustomize={handleCustomize}
               onShare={() => setShowShare(true)}
+              onToggleFavorite={() => toggleFavorite(displayCombo.id)}
+              isFavorite={isFavorite(displayCombo.id)}
             />
           </>
         )}
