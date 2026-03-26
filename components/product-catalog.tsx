@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import type { FoodItem } from "@/lib/combo-datasets";
 import {
   productCatalog,
@@ -27,35 +26,30 @@ export function ProductCatalogView({
   return (
     <div className="flex flex-col gap-3">
       {/* Category tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+      <div className="flex gap-2 overflow-x-auto pb-1">
         {categoryOrder.map((key) => {
           const isActive = key === activeTab;
           return (
-            <motion.button
+            <button
               key={key}
               onClick={() => setActiveTab(key)}
-              className="shrink-0 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap cursor-pointer"
-              style={{
-                backgroundColor: isActive
-                  ? "rgba(255,255,255,0.25)"
-                  : "rgba(255,255,255,0.08)",
-                color: isActive
-                  ? "rgba(255,255,255,1)"
-                  : "rgba(255,255,255,0.6)",
-              }}
-              whileTap={{ scale: 0.95 }}
+              className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap cursor-pointer transition-colors ${
+                isActive
+                  ? "bg-foreground text-primary-foreground"
+                  : "bg-secondary text-muted-foreground"
+              }`}
             >
               {categoryLabels[key]}
               <span className="ml-1 opacity-60">
                 {productCatalog.categories[key].length}
               </span>
-            </motion.button>
+            </button>
           );
         })}
       </div>
 
       {/* Product list */}
-      <div className="flex flex-col gap-1.5 max-h-[40vh] overflow-y-auto pr-1">
+      <div className="flex flex-col gap-1 max-h-[40vh] overflow-y-auto">
         {items.map((item) => (
           <ProductCard
             key={item.name}

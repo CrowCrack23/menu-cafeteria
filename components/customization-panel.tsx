@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import type { Combo, FoodItem } from "@/lib/combo-datasets";
 import type { Mood } from "@/lib/moods";
 import { calculateMatchScore } from "@/lib/score-calculator";
@@ -37,7 +36,7 @@ export function CustomizationPanel({
   const handleAdd = useCallback(
     (item: FoodItem) => {
       if (customItems.length >= MAX_ITEMS) {
-        showFeedback("Máximo 4 items — quita uno primero 👆");
+        showFeedback("Maximo 4 items — quita uno primero");
         return;
       }
       if (customItems.some((i) => i.name === item.name)) return;
@@ -52,7 +51,7 @@ export function CustomizationPanel({
   const handleRemove = useCallback(
     (item: FoodItem) => {
       if (customItems.length <= MIN_ITEMS) {
-        showFeedback("Necesitas al menos 3 items 🤏");
+        showFeedback("Necesitas al menos 3 items");
         return;
       }
 
@@ -68,60 +67,32 @@ export function CustomizationPanel({
   }, [customItems, score, onConfirm]);
 
   return (
-    <motion.div
-      className="fixed inset-0 z-50 flex flex-col justify-end"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-    >
+    <div className="fixed inset-0 z-50 flex flex-col justify-end">
       {/* Backdrop */}
-      <motion.div
-        className="absolute inset-0"
-        style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+      <div
+        className="absolute inset-0 bg-black/40"
         onClick={onClose}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
       />
 
       {/* Panel */}
-      <motion.div
-        className="relative rounded-t-3xl overflow-hidden max-h-[85vh] flex flex-col"
-        style={{
-          background: `linear-gradient(180deg, ${mood.gradient[0]}ee, ${mood.gradient[1]}ee)`,
-          backdropFilter: "blur(20px)",
-        }}
-        initial={{ y: "100%" }}
-        animate={{ y: 0 }}
-        exit={{ y: "100%" }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        drag="y"
-        dragConstraints={{ top: 0 }}
-        dragElastic={0.1}
-        onDragEnd={(_, info) => {
-          if (info.offset.y > 100) onClose();
-        }}
-      >
+      <div className="relative rounded-t-2xl overflow-hidden max-h-[85vh] flex flex-col bg-[#f8f9fa] border-t border-border">
         {/* Drag handle */}
         <div className="flex justify-center py-3">
-          <div
-            className="w-10 h-1 rounded-full"
-            style={{ backgroundColor: "rgba(255,255,255,0.3)" }}
-          />
+          <div className="w-10 h-1 rounded-full bg-border" />
         </div>
 
         <div className="flex flex-col gap-4 px-4 pb-4 overflow-y-auto flex-1">
           {/* Header + score */}
           <div className="flex items-center justify-between">
-            <h2 className="text-white font-bold text-lg">
+            <h2 className="text-foreground font-bold text-lg">
               Personaliza tu combo
             </h2>
-            <MatchScore score={score} color={mood.gradient[1]} />
+            <MatchScore score={score} />
           </div>
 
           {/* Current items */}
           <div>
-            <p className="text-white/60 text-xs mb-2 uppercase tracking-wider">
+            <p className="text-muted-foreground text-xs mb-2 uppercase tracking-wider font-medium">
               Tu combo actual
             </p>
             <CurrentComboEditor
@@ -133,7 +104,7 @@ export function CustomizationPanel({
 
           {/* Catalog */}
           <div>
-            <p className="text-white/60 text-xs mb-2 uppercase tracking-wider">
+            <p className="text-muted-foreground text-xs mb-2 uppercase tracking-wider font-medium">
               Productos disponibles
             </p>
             <ProductCatalogView
@@ -145,35 +116,21 @@ export function CustomizationPanel({
 
         {/* Listo button */}
         <div className="px-4 pb-4" style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}>
-          <motion.button
+          <button
             onClick={handleConfirm}
-            className="w-full py-3.5 min-h-[48px] rounded-full text-white font-bold text-base cursor-pointer"
-            style={{ backgroundColor: "rgba(255,255,255,0.25)" }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            className="w-full py-3 min-h-[48px] rounded-xl bg-foreground text-primary-foreground font-semibold text-sm cursor-pointer active:scale-[0.97] transition-transform"
           >
-            ✓ Listo
-          </motion.button>
+            Listo
+          </button>
         </div>
-      </motion.div>
+      </div>
 
       {/* Feedback toast */}
-      <AnimatePresence>
-        {feedback && (
-          <motion.div
-            className="fixed top-8 left-1/2 -translate-x-1/2 px-5 py-2.5 rounded-full text-sm font-medium shadow-lg z-60 whitespace-nowrap"
-            style={{
-              backgroundColor: "rgba(0,0,0,0.8)",
-              color: "rgba(255,255,255,0.9)",
-            }}
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-          >
-            {feedback}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+      {feedback && (
+        <div className="fixed top-8 left-1/2 -translate-x-1/2 px-5 py-2.5 rounded-full text-sm font-medium shadow-lg z-60 bg-foreground text-primary-foreground whitespace-nowrap">
+          {feedback}
+        </div>
+      )}
+    </div>
   );
 }

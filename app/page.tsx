@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
 import type { Mood } from "@/lib/moods";
 import { useSessionStore } from "@/stores/session-store";
 import { getTimePeriod } from "@/lib/time-utils";
@@ -61,38 +60,14 @@ export default function Home() {
   );
 
   if (!hasHydrated || !visitInfo) {
-    return (
-      <div
-        className="flex flex-col flex-1 items-center justify-center min-h-dvh"
-        style={{
-          background:
-            "linear-gradient(135deg, var(--page-gradient-from), var(--page-gradient-via), var(--page-gradient-to))",
-        }}
-      />
-    );
+    return <div className="flex flex-col flex-1 items-center justify-center min-h-dvh" />;
   }
 
   return (
-    <div
-      className="flex flex-col flex-1 items-center min-h-dvh px-4 py-8 sm:py-12 sm:justify-center"
-      style={{
-        background:
-          "linear-gradient(135deg, var(--page-gradient-from), var(--page-gradient-via), var(--page-gradient-to))",
-        paddingTop: "max(2rem, env(safe-area-inset-top))",
-        paddingBottom: "max(2rem, env(safe-area-inset-bottom))",
-      }}
-    >
-      <motion.div
-        className="flex flex-col items-center gap-6 sm:gap-10 w-full max-w-4xl my-auto"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: isTransitioning ? 0 : 1 }}
-        transition={{ duration: 0.3 }}
-      >
+    <div className="flex flex-col flex-1 items-center min-h-dvh px-4 py-8 sm:py-12 sm:justify-center">
+      <div className="flex flex-col items-center gap-6 sm:gap-10 w-full max-w-lg my-auto">
         {!visitInfo.isFirstVisit && streakCount > 0 && (
-          <StreakBadge
-            count={streakCount}
-            isMilestone={visitInfo.isMilestone}
-          />
+          <StreakBadge count={streakCount} />
         )}
         <WelcomeBanner message={welcomeMessage} subtitle={subtitle} />
         <MoodGrid onSelect={handleMoodSelect} disabled={isTransitioning} />
@@ -101,7 +76,7 @@ export default function Home() {
           onSelect={handleMoodSelect}
           disabled={isTransitioning}
         />
-      </motion.div>
+      </div>
     </div>
   );
 }
