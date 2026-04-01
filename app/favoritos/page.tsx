@@ -33,19 +33,24 @@ export default function FavoritosPage() {
   return (
     <div className="flex flex-col min-h-dvh px-4 py-6 pb-24">
       <div className="w-full max-w-lg mx-auto">
-        <h1 className="text-xl font-bold text-foreground mb-6">Favoritos</h1>
+        <h1 className="text-xl font-bold text-foreground mb-1">Tus favoritos</h1>
+        <p className="text-muted-foreground text-xs mb-6">
+          Los combos que guardaste para enviar de nuevo
+        </p>
 
         {favorites.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-16 text-center">
-            <span className="text-4xl">♡</span>
-            <p className="text-muted-foreground text-sm">
-              Aun no tienes favoritos. Marca un combo con el corazon para guardarlo.
+            <span className="text-5xl">💝</span>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              Todavia no guardaste ninguno.<br />
+              Cuando encuentres el combo perfecto,<br />
+              toca el corazon para guardarlo aqui.
             </p>
             <Link
               href="/"
-              className="mt-2 px-5 py-2.5 bg-foreground text-primary-foreground rounded-xl font-medium text-sm"
+              className="mt-3 px-5 py-2.5 bg-[#c2410c] text-white rounded-xl font-medium text-sm"
             >
-              Ver combos
+              Explorar combos
             </Link>
           </div>
         ) : (
@@ -53,25 +58,26 @@ export default function FavoritosPage() {
             {favorites.map((fav) => (
               <div
                 key={fav.id}
-                className="flex items-center gap-3 p-4 rounded-xl bg-white border border-border"
+                className="flex items-center gap-3 p-4 rounded-2xl bg-white border border-border shadow-sm"
               >
+                <span className="text-2xl shrink-0">📦</span>
                 <div className="flex flex-col min-w-0 flex-1">
                   <span className="text-foreground font-semibold text-sm leading-tight truncate">
                     {fav.name}
                   </span>
                   <span className="text-muted-foreground text-xs mt-0.5">
-                    {fav.count} productos · ${formatCUP(fav.total)} CUP · ~${cupToUSD(fav.total)} USD
+                    {fav.count} productos · ~${cupToUSD(fav.total)} USD
                   </span>
                 </div>
                 <Link
                   href={`/combo/${fav.id}`}
-                  className="px-3 py-1.5 bg-foreground text-primary-foreground rounded-lg text-xs font-medium shrink-0"
+                  className="px-3 py-1.5 bg-[#c2410c] text-white rounded-lg text-xs font-medium shrink-0"
                 >
-                  Ver
+                  Enviar
                 </Link>
                 <button
                   onClick={() => toggleFavorite(fav.id)}
-                  className="p-1.5 text-red-400 cursor-pointer shrink-0"
+                  className="p-1.5 text-red-400 cursor-pointer shrink-0 text-lg"
                 >
                   ♥
                 </button>

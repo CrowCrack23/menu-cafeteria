@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation";
 import { Home, Heart, Clock, Package } from "lucide-react";
 
 const navItems = [
-  { href: "/", label: "Combos", icon: Home },
-  { href: "/favoritos", label: "Favoritos", icon: Heart },
+  { href: "/", label: "Inicio", icon: Home },
+  { href: "/favoritos", label: "Guardados", icon: Heart },
   { href: "/historial", label: "Historial", icon: Clock },
   { href: "/menu", label: "Stock", icon: Package },
 ];
@@ -27,7 +27,7 @@ export function BottomNav() {
               key={href}
               href={href}
               className={`flex flex-col items-center gap-0.5 py-2 px-3 min-w-[60px] text-center ${
-                isActive ? "text-foreground" : "text-muted-foreground"
+                isActive ? "text-[#c2410c]" : "text-muted-foreground"
               }`}
             >
               <Icon size={20} strokeWidth={isActive ? 2.5 : 1.5} />

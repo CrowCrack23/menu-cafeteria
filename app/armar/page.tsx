@@ -4,7 +4,6 @@ import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  products,
   categoryLabels,
   categoryOrder,
   getProductsByCategory,
@@ -60,14 +59,14 @@ export default function ArmarPage() {
 
   const handleSave = useCallback(() => {
     if (items.length === 0) return;
-    const id = saveCustomCombo("Mi combo personalizado", items);
-    showToast("Combo guardado!");
+    const id = saveCustomCombo("Combo con amor", items);
+    showToast("Combo guardado");
     router.push(`/combo/${id}`);
   }, [items, saveCustomCombo, showToast, router]);
 
   const handleShare = useCallback(async () => {
-    const result = await shareCombo("Mi combo personalizado", items);
-    if (result === "copied") showToast("Copiado!");
+    const result = await shareCombo("Combo con amor", items);
+    if (result === "copied") showToast("Copiado al portapapeles");
     else if (result === "failed") showToast("No se pudo compartir");
   }, [items, showToast]);
 
@@ -80,14 +79,15 @@ export default function ArmarPage() {
   return (
     <div className="flex flex-col min-h-dvh px-4 py-6 pb-40">
       <div className="w-full max-w-lg mx-auto">
-        {/* Back */}
         <Link href="/" className="text-muted-foreground text-sm mb-4 inline-block">
           ← Volver
         </Link>
 
-        <h1 className="text-xl font-bold text-foreground mb-1">Arma tu combo</h1>
+        <h1 className="text-xl font-bold text-foreground mb-1">
+          Arma algo especial
+        </h1>
         <p className="text-muted-foreground text-sm mb-5">
-          Agrega los productos que necesitas
+          Elige lo que tu familia necesita, producto por producto
         </p>
 
         {/* Category tabs */}
@@ -100,7 +100,7 @@ export default function ArmarPage() {
                 onClick={() => setActiveTab(key)}
                 className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap cursor-pointer transition-colors ${
                   isActive
-                    ? "bg-foreground text-primary-foreground"
+                    ? "bg-[#c2410c] text-white"
                     : "bg-white border border-border text-muted-foreground"
                 }`}
               >
@@ -121,7 +121,7 @@ export default function ArmarPage() {
                 key={product.id}
                 className={`flex items-center gap-3 p-3 rounded-xl bg-white border border-border ${
                   isUnavailable ? "opacity-40" : ""
-                }`}
+                } ${qty > 0 ? "border-[#c2410c]/30 bg-[#fff7ed]" : ""}`}
               >
                 <span className="text-2xl shrink-0">{product.emoji}</span>
                 <div className="flex flex-col min-w-0 flex-1">
@@ -153,7 +153,7 @@ export default function ArmarPage() {
                     )}
                     <button
                       onClick={() => handleQuantityChange(product.id, 1)}
-                      className="w-8 h-8 flex items-center justify-center rounded-full bg-foreground text-primary-foreground font-bold cursor-pointer"
+                      className="w-8 h-8 flex items-center justify-center rounded-full bg-[#c2410c] text-white font-bold cursor-pointer"
                     >
                       +
                     </button>
@@ -168,10 +168,10 @@ export default function ArmarPage() {
       {/* Floating bottom bar */}
       {items.length > 0 && (
         <div className="fixed bottom-16 inset-x-0 z-30 px-4 pb-2">
-          <div className="w-full max-w-lg mx-auto bg-white border border-border rounded-xl shadow-lg p-3">
+          <div className="w-full max-w-lg mx-auto bg-white border border-border rounded-2xl shadow-lg p-3">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-muted-foreground">
-                {items.reduce((s, i) => s + i.quantity, 0)} productos
+                {items.reduce((s, i) => s + i.quantity, 0)} productos para tu familia
               </span>
               <div className="text-right">
                 <span className="text-foreground font-bold">${formatCUP(total)} CUP</span>
@@ -181,9 +181,9 @@ export default function ArmarPage() {
             <div className="flex gap-2">
               <button
                 onClick={handleSave}
-                className="flex-1 py-2.5 rounded-xl bg-foreground text-primary-foreground font-semibold text-sm cursor-pointer active:scale-[0.97] transition-transform"
+                className="flex-1 py-2.5 rounded-xl bg-[#c2410c] text-white font-semibold text-sm cursor-pointer active:scale-[0.97] transition-transform"
               >
-                Guardar
+                Guardar combo
               </button>
               <button
                 onClick={handleShare}
@@ -196,9 +196,8 @@ export default function ArmarPage() {
         </div>
       )}
 
-      {/* Toast */}
       {toast && (
-        <div className="fixed bottom-36 left-1/2 -translate-x-1/2 px-5 py-2.5 bg-foreground text-primary-foreground rounded-full text-sm font-medium shadow-lg z-60">
+        <div className="fixed bottom-36 left-1/2 -translate-x-1/2 px-5 py-2.5 bg-foreground text-white rounded-full text-sm font-medium shadow-lg z-60">
           {toast}
         </div>
       )}

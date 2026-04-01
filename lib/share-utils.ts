@@ -16,7 +16,7 @@ function formatComboText(name: string, items: ComboItem[]): string {
     "",
     `Total: $${formatCUP(total)} CUP (~$${cupToUSD(total)} USD)`,
     "",
-    "— Mi Combo",
+    "— CubaCombo",
   ].join("\n");
 }
 

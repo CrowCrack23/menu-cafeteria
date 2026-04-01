@@ -9,7 +9,7 @@ import {
   resolveComboItems,
 } from "@/lib/combos";
 import type { ComboItem } from "@/lib/combos";
-import { formatCUP, cupToUSD, getProductById } from "@/lib/products";
+import { formatCUP, cupToUSD } from "@/lib/products";
 import { useSessionStore } from "@/stores/session-store";
 import { useMenuStore } from "@/stores/menu-store";
 import { shareCombo } from "@/lib/share-utils";
@@ -44,7 +44,6 @@ export default function ComboDetailPage({
   const unavailableSet = new Set(unavailableItems);
   const hasUnavailable = resolved.some((r) => unavailableSet.has(r.product.name));
 
-  // Track view in history
   useEffect(() => {
     if (hasHydrated && source) {
       addToHistory(id);
@@ -85,16 +84,16 @@ export default function ComboDetailPage({
 
   const handleSave = useCallback(() => {
     if (!editItems) return;
-    const name = source?.name ? `Mi ${source.name}` : "Mi combo";
+    const name = source?.name ? `Mi ${source.name}` : "Mi combo especial";
     const newId = saveCustomCombo(name, editItems);
-    showToast("Combo guardado!");
+    showToast("Combo guardado con amor");
     router.push(`/combo/${newId}`);
   }, [editItems, source, saveCustomCombo, showToast, router]);
 
   const handleShare = useCallback(async () => {
-    const name = source?.name ?? "Mi combo";
+    const name = source?.name ?? "Mi combo especial";
     const result = await shareCombo(name, currentItems);
-    if (result === "copied") showToast("Copiado!");
+    if (result === "copied") showToast("Copiado al portapapeles");
     else if (result === "failed") showToast("No se pudo compartir");
   }, [source, currentItems, showToast]);
 
@@ -105,15 +104,15 @@ export default function ComboDetailPage({
   if (!source) {
     return (
       <div className="flex flex-col items-center justify-center min-h-dvh gap-4 px-4 pb-20">
-        <span className="text-4xl">🤔</span>
+        <span className="text-5xl">📦</span>
         <p className="text-lg text-center text-foreground">
-          No encontramos este combo.
+          No encontramos este combo
         </p>
         <Link
           href="/"
-          className="mt-4 px-6 py-3 bg-foreground text-primary-foreground rounded-xl font-medium text-sm"
+          className="mt-2 px-6 py-3 bg-[#c2410c] text-white rounded-xl font-medium text-sm"
         >
-          Ir al inicio
+          Ver todos los combos
         </Link>
       </div>
     );
@@ -140,17 +139,23 @@ export default function ComboDetailPage({
           </button>
         </div>
 
+        <p className="text-muted-foreground text-xs mb-4">
+          {isEditing
+            ? "Ajusta las cantidades para que sea perfecto"
+            : "Esto es lo que recibira tu familia"}
+        </p>
+
         {/* Price summary */}
-        <div className="flex items-baseline gap-2 mb-5">
-          <span className="text-2xl font-bold text-foreground">
+        <div className="flex items-baseline gap-2 mb-4 p-3 rounded-xl bg-secondary">
+          <span className="text-2xl font-bold text-[#c2410c]">
             ${formatCUP(total)} CUP
           </span>
           <span className="text-sm text-muted-foreground">
             ~${cupToUSD(total)} USD
           </span>
           {source.priceUSD && !isEditing && (
-            <span className="ml-auto px-2 py-0.5 rounded-full bg-secondary text-xs text-muted-foreground">
-              Precio fijo: ${source.priceUSD} USD
+            <span className="ml-auto px-2 py-0.5 rounded-full bg-white text-xs text-muted-foreground">
+              ${source.priceUSD} USD
             </span>
           )}
         </div>
@@ -159,7 +164,7 @@ export default function ComboDetailPage({
         {hasUnavailable && (
           <div className="flex items-center gap-2 w-full px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm mb-4">
             <span>⚠️</span>
-            <span>Algunos productos no estan disponibles</span>
+            <span>Algunos productos no estan disponibles hoy</span>
           </div>
         )}
 
@@ -187,7 +192,6 @@ export default function ComboDetailPage({
                   )}
                 </div>
 
-                {/* Quantity controls */}
                 <div className="flex items-center gap-2 shrink-0">
                   {isEditing && (
                     <button
@@ -224,15 +228,15 @@ export default function ComboDetailPage({
             <>
               <button
                 onClick={() => setEditItems([...(source.items)])}
-                className="w-full py-3 min-h-[48px] rounded-xl bg-foreground text-primary-foreground font-semibold text-sm cursor-pointer active:scale-[0.97] transition-transform"
+                className="w-full py-3 min-h-[48px] rounded-xl bg-[#c2410c] text-white font-semibold text-sm cursor-pointer active:scale-[0.97] transition-transform"
               >
-                Personalizar
+                Personalizar para tu familia
               </button>
               <button
                 onClick={handleShare}
                 className="w-full py-3 min-h-[48px] rounded-xl bg-white border border-border text-foreground font-medium text-sm cursor-pointer active:scale-[0.97] transition-transform"
               >
-                Compartir
+                Compartir este combo
               </button>
             </>
           ) : (
@@ -240,7 +244,7 @@ export default function ComboDetailPage({
               <button
                 onClick={handleSave}
                 disabled={currentItems.length === 0}
-                className="w-full py-3 min-h-[48px] rounded-xl bg-foreground text-primary-foreground font-semibold text-sm cursor-pointer active:scale-[0.97] transition-transform disabled:opacity-40"
+                className="w-full py-3 min-h-[48px] rounded-xl bg-[#c2410c] text-white font-semibold text-sm cursor-pointer active:scale-[0.97] transition-transform disabled:opacity-40"
               >
                 Guardar mi combo
               </button>
@@ -255,9 +259,8 @@ export default function ComboDetailPage({
         </div>
       </div>
 
-      {/* Toast */}
       {toast && (
-        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 px-5 py-2.5 bg-foreground text-primary-foreground rounded-full text-sm font-medium shadow-lg z-60">
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 px-5 py-2.5 bg-foreground text-white rounded-full text-sm font-medium shadow-lg z-60">
           {toast}
         </div>
       )}

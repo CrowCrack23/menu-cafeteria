@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useMenuStore } from "@/stores/menu-store";
 import {
-  products,
   categoryLabels,
   categoryOrder,
   getProductsByCategory,
@@ -27,7 +26,7 @@ export default function MenuPage() {
   return (
     <div className="flex flex-col min-h-dvh px-4 py-6 pb-24">
       <div className="w-full max-w-lg mx-auto">
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-1">
           <h1 className="text-xl font-bold text-foreground">Disponibilidad</h1>
           {totalUnavailable > 0 && (
             <button
@@ -39,14 +38,10 @@ export default function MenuPage() {
           )}
         </div>
 
-        {totalUnavailable > 0 && (
-          <p className="text-xs text-muted-foreground mb-4">
-            {totalUnavailable} producto{totalUnavailable !== 1 ? "s" : ""} no disponible{totalUnavailable !== 1 ? "s" : ""}
-          </p>
-        )}
-
         <p className="text-muted-foreground text-xs mb-4">
-          Toca un producto para marcar si esta disponible o no.
+          {totalUnavailable > 0
+            ? `${totalUnavailable} producto${totalUnavailable !== 1 ? "s" : ""} no disponible${totalUnavailable !== 1 ? "s" : ""} hoy`
+            : "Toca un producto para marcar si esta disponible o no"}
         </p>
 
         {/* Category tabs */}
@@ -59,7 +54,7 @@ export default function MenuPage() {
                 onClick={() => setActiveTab(key)}
                 className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap cursor-pointer transition-colors ${
                   isActive
-                    ? "bg-foreground text-primary-foreground"
+                    ? "bg-[#c2410c] text-white"
                     : "bg-white border border-border text-muted-foreground"
                 }`}
               >
@@ -88,17 +83,15 @@ export default function MenuPage() {
                   }`}
                 />
                 <span className="text-2xl shrink-0">{product.emoji}</span>
-                <div className="flex flex-col min-w-0 flex-1">
-                  <span
-                    className={`text-sm font-medium leading-tight ${
-                      isUnavailable
-                        ? "text-muted-foreground line-through"
-                        : "text-foreground"
-                    }`}
-                  >
-                    {product.name}
-                  </span>
-                </div>
+                <span
+                  className={`text-sm font-medium flex-1 ${
+                    isUnavailable
+                      ? "text-muted-foreground line-through"
+                      : "text-foreground"
+                  }`}
+                >
+                  {product.name}
+                </span>
                 <span className="text-muted-foreground text-xs shrink-0">
                   ${formatCUP(product.price)}
                 </span>

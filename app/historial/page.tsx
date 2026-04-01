@@ -62,29 +62,33 @@ export default function HistorialPage() {
   return (
     <div className="flex flex-col min-h-dvh px-4 py-6 pb-24">
       <div className="w-full max-w-lg mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-xl font-bold text-foreground">Historial</h1>
+        <div className="flex items-center justify-between mb-1">
+          <h1 className="text-xl font-bold text-foreground">Tu historial</h1>
           {entries.length > 0 && (
             <button
               onClick={clearHistory}
               className="text-xs text-muted-foreground cursor-pointer"
             >
-              Borrar todo
+              Borrar
             </button>
           )}
         </div>
+        <p className="text-muted-foreground text-xs mb-6">
+          Los combos que has visto o enviado
+        </p>
 
         {entries.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-16 text-center">
-            <span className="text-4xl">📋</span>
-            <p className="text-muted-foreground text-sm">
-              Tu historial esta vacio.
+            <span className="text-5xl">📋</span>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              Aun no has visto ningun combo.<br />
+              Tu historial aparecera aqui.
             </p>
             <Link
               href="/"
-              className="mt-2 px-5 py-2.5 bg-foreground text-primary-foreground rounded-xl font-medium text-sm"
+              className="mt-3 px-5 py-2.5 bg-[#c2410c] text-white rounded-xl font-medium text-sm"
             >
-              Ver combos
+              Explorar combos
             </Link>
           </div>
         ) : (
@@ -101,7 +105,7 @@ export default function HistorialPage() {
                     {entry.name}
                   </span>
                   <span className="text-muted-foreground text-xs">
-                    {entry.count} prod. · ${formatCUP(entry.total)} CUP · ~${cupToUSD(entry.total)} USD
+                    {entry.count} prod. · ~${cupToUSD(entry.total)} USD
                   </span>
                 </div>
                 <span className="text-muted-foreground text-xs shrink-0">

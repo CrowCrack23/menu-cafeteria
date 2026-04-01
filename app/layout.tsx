@@ -12,11 +12,13 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
+  themeColor: "#c2410c",
 };
 
 export const metadata: Metadata = {
-  title: "Mi Combo",
-  description: "Arma tu combo perfecto en la cafeteria",
+  title: "CubaCombo — Cuida a tu familia desde lejos",
+  description:
+    "Envia combos de productos esenciales a tus seres queridos en Cuba. Rapido, confiable, con amor.",
 };
 
 export default function RootLayout({
@@ -26,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`${geistSans.variable} h-dvh antialiased`}>
-      <body className="min-h-dvh flex flex-col bg-[#f8f9fa]">
+      <body className="min-h-dvh flex flex-col bg-background">
         {children}
         <BottomNav />
       </body>
