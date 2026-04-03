@@ -9,10 +9,11 @@ import {
   resolveComboItems,
 } from "@/lib/combos";
 import type { ComboItem } from "@/lib/combos";
-import { formatCUP, cupToUSD } from "@/lib/products";
+import { formatCUP, cupToUSD, CUP_PER_USD } from "@/lib/products";
 import { useSessionStore } from "@/stores/session-store";
 import { useMenuStore } from "@/stores/menu-store";
 import { shareCombo } from "@/lib/share-utils";
+import { PageSkeleton } from "@/components/page-skeleton";
 
 export default function ComboDetailPage({
   params,
@@ -98,7 +99,7 @@ export default function ComboDetailPage({
   }, [source, currentItems, showToast]);
 
   if (!hasHydrated || !menuHydrated) {
-    return <div className="flex flex-col flex-1 items-center justify-center min-h-dvh" />;
+    return <PageSkeleton />;
   }
 
   if (!source) {
@@ -146,16 +147,31 @@ export default function ComboDetailPage({
         </p>
 
         {/* Price summary */}
-        <div className="flex items-baseline gap-2 mb-4 p-3 rounded-xl bg-secondary">
-          <span className="text-2xl font-bold text-[#c2410c]">
-            ${formatCUP(total)} CUP
-          </span>
-          <span className="text-sm text-muted-foreground">
-            ~${cupToUSD(total)} USD
-          </span>
-          {source.priceUSD && !isEditing && (
-            <span className="ml-auto px-2 py-0.5 rounded-full bg-white text-xs text-muted-foreground">
-              ${source.priceUSD} USD
+        <div className="flex flex-col gap-1 mb-4 p-3 rounded-xl bg-secondary">
+          <div className="flex items-baseline gap-2">
+            {source.priceUSD && !isEditing ? (
+              <>
+                <span className="text-2xl font-bold text-[#c2410c]">
+                  ${source.priceUSD} USD
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  ${formatCUP(source.priceUSD * CUP_PER_USD)} CUP
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="text-2xl font-bold text-[#c2410c]">
+                  ${formatCUP(total)} CUP
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  ~${cupToUSD(total)} USD
+                </span>
+              </>
+            )}
+          </div>
+          {source.priceUSD && !isEditing && total > source.priceUSD * CUP_PER_USD && (
+            <span className="text-xs font-medium text-green-700">
+              Ahorras ${formatCUP(total - source.priceUSD * CUP_PER_USD)} CUP vs comprarlo suelto
             </span>
           )}
         </div>

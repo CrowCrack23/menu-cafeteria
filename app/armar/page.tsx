@@ -7,6 +7,7 @@ import {
   categoryLabels,
   categoryOrder,
   getProductsByCategory,
+  getProductById,
   formatCUP,
   cupToUSD,
   type Category,
@@ -16,6 +17,7 @@ import { calculateComboTotal } from "@/lib/combos";
 import { useSessionStore } from "@/stores/session-store";
 import { useMenuStore } from "@/stores/menu-store";
 import { shareCombo } from "@/lib/share-utils";
+import { PageSkeleton } from "@/components/page-skeleton";
 
 export default function ArmarPage() {
   const router = useRouter();
@@ -71,7 +73,7 @@ export default function ArmarPage() {
   }, [items, showToast]);
 
   if (!hasHydrated || !menuHydrated) {
-    return <div className="flex flex-col flex-1 items-center justify-center min-h-dvh" />;
+    return <PageSkeleton />;
   }
 
   const categoryProducts = getProductsByCategory(activeTab);
@@ -86,9 +88,29 @@ export default function ArmarPage() {
         <h1 className="text-xl font-bold text-foreground mb-1">
           Arma algo especial
         </h1>
-        <p className="text-muted-foreground text-sm mb-5">
+        <p className="text-muted-foreground text-sm mb-4">
           Elige lo que tu familia necesita, producto por producto
         </p>
+
+        {/* Selected items summary */}
+        {items.length > 0 && (
+          <div className="flex items-center gap-2 mb-4 p-2.5 rounded-xl bg-secondary overflow-x-auto">
+            <div className="flex gap-1 shrink-0">
+              {items.map((item) => {
+                const p = getProductById(item.productId);
+                if (!p) return null;
+                return (
+                  <span key={item.productId} className="text-lg" title={`${p.name} x${item.quantity}`}>
+                    {p.emoji}
+                  </span>
+                );
+              })}
+            </div>
+            <span className="text-xs text-muted-foreground shrink-0 ml-auto">
+              {items.reduce((s, i) => s + i.quantity, 0)} prod.
+            </span>
+          </div>
+        )}
 
         {/* Category tabs */}
         <div className="flex gap-2 overflow-x-auto pb-1 mb-4">

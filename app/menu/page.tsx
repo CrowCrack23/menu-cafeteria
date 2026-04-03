@@ -9,6 +9,7 @@ import {
   formatCUP,
   type Category,
 } from "@/lib/products";
+import { PageSkeleton } from "@/components/page-skeleton";
 
 export default function MenuPage() {
   const { hasHydrated, unavailableItems, toggleAvailability, resetAll } =
@@ -16,7 +17,7 @@ export default function MenuPage() {
   const [activeTab, setActiveTab] = useState<Category>("basicos");
 
   if (!hasHydrated) {
-    return <div className="flex flex-col flex-1 items-center justify-center min-h-dvh" />;
+    return <PageSkeleton />;
   }
 
   const unavailableSet = new Set(unavailableItems);

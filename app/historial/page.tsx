@@ -4,6 +4,7 @@ import { useSessionStore } from "@/stores/session-store";
 import { getComboById, calculateComboTotal, getComboItemCount } from "@/lib/combos";
 import { formatCUP, cupToUSD } from "@/lib/products";
 import Link from "next/link";
+import { PageSkeleton } from "@/components/page-skeleton";
 
 function formatTime(timestamp: number): string {
   const now = Date.now();
@@ -28,7 +29,7 @@ export default function HistorialPage() {
     useSessionStore();
 
   if (!hasHydrated) {
-    return <div className="flex flex-col flex-1 items-center justify-center min-h-dvh" />;
+    return <PageSkeleton />;
   }
 
   const entries = comboHistory
